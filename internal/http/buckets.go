@@ -27,6 +27,6 @@ func createBucket(w http.ResponseWriter, r *http.Request, d *data) (int, error) 
 		return http.StatusInternalServerError, err
 	}
 
-	w.Write(bytesconv.StringToBytes(b.Name()))
+	_, _ = w.Write(bytesconv.StringToBytes(b.Name()))
 	return 0, nil
 }

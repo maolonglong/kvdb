@@ -15,7 +15,13 @@ type Store interface {
 
 	Set(ctx context.Context, txn any, key, val []byte, opts *SetOptions) error
 	Delete(ctx context.Context, txn any, key []byte) error
-	Incr(ctx context.Context, txn any, key []byte, increment int64, opts *SetOptions) (int64, error)
+	Incr(
+		ctx context.Context,
+		txn any,
+		key []byte,
+		increment int64,
+		opts *SetOptions,
+	) (int64, error)
 
 	Close() error
 }

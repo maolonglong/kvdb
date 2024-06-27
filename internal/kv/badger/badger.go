@@ -102,7 +102,13 @@ func (s *Store) Has(ctx context.Context, _txn any, key []byte) (bool, error) {
 	return item != nil, nil
 }
 
-func (s *Store) Incr(ctx context.Context, _txn any, key []byte, increment int64, opts *kv.SetOptions) (int64, error) {
+func (s *Store) Incr(
+	ctx context.Context,
+	_txn any,
+	key []byte,
+	increment int64,
+	opts *kv.SetOptions,
+) (int64, error) {
 	txn := _txn.(*badger.Txn)
 
 	var (

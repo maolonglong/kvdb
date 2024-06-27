@@ -23,9 +23,9 @@ func mkLua(w io.Writer, r *http.Request, b *Bucket, txn any, l *lua.LState) *lua
 	write := func(newline bool) lua.LGFunction {
 		return func(l *lua.LState) int {
 			msg := l.CheckString(1)
-			w.Write(bytesconv.StringToBytes(msg))
+			_, _ = w.Write(bytesconv.StringToBytes(msg))
 			if newline {
-				w.Write([]byte{'\n'})
+				_, _ = w.Write([]byte{'\n'})
 			}
 			return 0
 		}

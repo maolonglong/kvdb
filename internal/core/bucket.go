@@ -122,7 +122,12 @@ func (b *Bucket) Set(ctx context.Context, key, val []byte, ttl time.Duration) er
 	})
 }
 
-func (b *Bucket) Incr(ctx context.Context, key []byte, increment int64, ttl time.Duration) (int64, error) {
+func (b *Bucket) Incr(
+	ctx context.Context,
+	key []byte,
+	increment int64,
+	ttl time.Duration,
+) (int64, error) {
 	uKey := b.udataKey(key, _markKeyValue)
 	opts := &kv.SetOptions{
 		TTL: b.opts.DefaultTTL,
@@ -196,7 +201,12 @@ func (b *Bucket) StoreScript(ctx context.Context, name, content []byte) error {
 	})
 }
 
-func (b *Bucket) DoScript(ctx context.Context, w http.ResponseWriter, r *http.Request, name []byte) error {
+func (b *Bucket) DoScript(
+	ctx context.Context,
+	w http.ResponseWriter,
+	r *http.Request,
+	name []byte,
+) error {
 	script, err := b.loadScript(ctx, name)
 	if err != nil {
 		return err
@@ -265,7 +275,7 @@ func (b *Bucket) DoScript(ctx context.Context, w http.ResponseWriter, r *http.Re
 		w.WriteHeader(int(code))
 	}
 
-	buf.WriteTo(w)
+	_, _ = buf.WriteTo(w)
 	return nil
 }
 
@@ -296,9 +306,9 @@ func (b *Bucket) udataKey(origin []byte, mark string) []byte {
 	defer pool.PutByteBuffer(buf)
 
 	// <bucket_name>:udata:<key>
-	buf.WriteString(b.name)
-	buf.WriteString(mark)
-	buf.Write(origin)
+	_, _ = buf.WriteString(b.name)
+	_, _ = buf.WriteString(mark)
+	_, _ = buf.Write(origin)
 
 	return bytes.Clone(buf.Bytes())
 }

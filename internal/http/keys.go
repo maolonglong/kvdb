@@ -25,7 +25,7 @@ func withBucket(next handleFunc) handleFunc {
 		if err != nil {
 			if errors.Is(err, kv.ErrKeyNotFound) {
 				w.WriteHeader(http.StatusNotFound)
-				w.Write([]byte("bucket not found"))
+				_, _ = w.Write([]byte("bucket not found"))
 				return 0, nil
 			}
 			return http.StatusInternalServerError, err
@@ -44,17 +44,20 @@ var setKeyValue = withBucket(func(_ http.ResponseWriter, r *http.Request, d *dat
 	}
 
 	ttl := time.Duration(cast.ToInt64(r.URL.Query().Get("ttl"))) * time.Second
+	// FIXME: handle error
 	d.bucket.Set(r.Context(), bytesconv.StringToBytes(vars["key"]), val, ttl)
 	return 0, nil
 })
 
-var deleteKeyValue = withBucket(func(_ http.ResponseWriter, r *http.Request, d *data) (int, error) {
-	vars := mux.Vars(r)
-	if err := d.bucket.Delete(r.Context(), bytesconv.StringToBytes(vars["key"])); err != nil {
-		return http.StatusInternalServerError, nil
-	}
-	return 0, nil
-})
+var deleteKeyValue = withBucket(
+	func(_ http.ResponseWriter, r *http.Request, d *data) (int, error) {
+		vars := mux.Vars(r)
+		if err := d.bucket.Delete(r.Context(), bytesconv.StringToBytes(vars["key"])); err != nil {
+			return http.StatusInternalServerError, nil
+		}
+		return 0, nil
+	},
+)
 
 var getKeyValue = withBucket(func(w http.ResponseWriter, r *http.Request, d *data) (int, error) {
 	vars := mux.Vars(r)
@@ -62,13 +65,13 @@ var getKeyValue = withBucket(func(w http.ResponseWriter, r *http.Request, d *dat
 	if err != nil {
 		if errors.Is(err, kv.ErrKeyNotFound) {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("key not found"))
+			_, _ = w.Write([]byte("key not found"))
 			return 0, nil
 		}
 		return http.StatusInternalServerError, err
 	}
 	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Write(val)
+	_, _ = w.Write(val)
 	return 0, nil
 })
 
@@ -103,7 +106,7 @@ var executeTxn = withBucket(func(w http.ResponseWriter, r *http.Request, d *data
 			})
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("invalid operation"))
+			_, _ = w.Write([]byte("invalid operation"))
 			return 0, nil
 		}
 	}
@@ -111,7 +114,7 @@ var executeTxn = withBucket(func(w http.ResponseWriter, r *http.Request, d *data
 	if err := d.bucket.ApplyTxn(r.Context(), ops); err != nil {
 		if errors.Is(err, kv.ErrTxnTooBig) {
 			w.WriteHeader(http.StatusRequestEntityTooLarge)
-			w.Write([]byte("txn too big"))
+			_, _ = w.Write([]byte("txn too big"))
 			return 0, nil
 		}
 		return http.StatusInternalServerError, err
@@ -129,14 +132,14 @@ var incrKeyValue = withBucket(func(w http.ResponseWriter, r *http.Request, d *da
 
 	if len(body) < 2 || (body[0] != '-' && body[0] != '+') {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("invalid body"))
+		_, _ = w.Write([]byte("invalid body"))
 		return 0, nil
 	}
 
 	increment, err := strconv.ParseInt(bytesconv.BytesToString(body[1:]), 10, 64)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("invalid num"))
+		_, _ = w.Write([]byte("invalid num"))
 		return 0, nil
 	}
 
@@ -146,11 +149,11 @@ var incrKeyValue = withBucket(func(w http.ResponseWriter, r *http.Request, d *da
 	if err != nil {
 		if errors.Is(err, kv.ErrInvalidNum) {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(fmt.Sprintf("key `%s` is not a number", key)))
+			_, _ = w.Write([]byte(fmt.Sprintf("key `%s` is not a number", key)))
 			return 0, nil
 		}
 		return http.StatusInternalServerError, err
 	}
-	w.Write(bytesconv.StringToBytes(strconv.FormatInt(val, 10)))
+	_, _ = w.Write(bytesconv.StringToBytes(strconv.FormatInt(val, 10)))
 	return 0, nil
 })

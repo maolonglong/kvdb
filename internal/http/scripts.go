@@ -34,13 +34,13 @@ var doScript = withBucket(func(w http.ResponseWriter, r *http.Request, d *data) 
 	if err := d.bucket.DoScript(r.Context(), w, r, bytesconv.StringToBytes(name)); err != nil {
 		if errors.Is(err, kv.ErrKeyNotFound) {
 			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte("script not found"))
+			_, _ = w.Write([]byte("script not found"))
 			return 0, nil
 		}
 		var luaErr *lua.ApiError
 		if errors.As(err, &luaErr) {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(luaErr.Object.String()))
+			_, _ = w.Write([]byte(luaErr.Object.String()))
 			return 0, nil
 		}
 		return http.StatusInternalServerError, err
