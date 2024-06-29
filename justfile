@@ -1,6 +1,8 @@
 alias t := test
 alias c := check
 
+set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
+
 default:
   just --list
 
