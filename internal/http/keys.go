@@ -45,7 +45,7 @@ var setKeyValue = withBucket(func(_ http.ResponseWriter, r *http.Request, d *dat
 
 	ttl := time.Duration(cast.ToInt64(r.URL.Query().Get("ttl"))) * time.Second
 	// FIXME: handle error
-	d.bucket.Set(r.Context(), bytesconv.StringToBytes(vars["key"]), val, ttl)
+	_ = d.bucket.Set(r.Context(), bytesconv.StringToBytes(vars["key"]), val, ttl)
 	return 0, nil
 })
 
