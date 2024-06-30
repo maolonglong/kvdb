@@ -1,0 +1,6 @@
+[files]
+ignore-dot = true
+ignore-files = true
+
+[default]
+binary = false

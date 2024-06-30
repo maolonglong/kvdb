@@ -1,2 +1,7 @@
 data/
 .idea/
+.vscode/
+.direnv/
+result
+result-*
+.pre-commit-config.yaml
